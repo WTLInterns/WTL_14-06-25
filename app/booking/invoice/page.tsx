@@ -119,7 +119,25 @@ function InvoiceContent() {
       distance,
       days
     })
-  }, [searchParams])
+
+    // Prefill form fields if user is logged in
+    if (typeof window !== 'undefined') {
+  const userStr = Cookies.get('user');
+  if (userStr) {
+    try {
+      const userObj = JSON.parse(userStr);
+      console.log('Loaded user from cookie:', userObj); // Debug
+      setFormData(prev => ({
+        name: userObj.username || userObj.name || prev.name || "",
+        email: userObj.email || prev.email || "",
+        phone: userObj.phone || userObj.mobileNo || prev.phone || ""
+      }));
+    } catch (err) {
+      console.log('Failed to parse user from cookie', err);
+    }
+  }
+}
+    }, [searchParams])
 
   const userId = Cookies.get('userId')
 

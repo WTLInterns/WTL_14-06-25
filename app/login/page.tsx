@@ -55,44 +55,98 @@ export default function LoginPage() {
       //   "message": null
       // }
       if (response.status === 200 && data.status === 'success') {
+        // Validate that we have required data
+        if (!data.userId) {
+          setError('Login failed: Invalid user data received.');
+          setPassword('');
+          return;
+        }
+
         // Convert role to uppercase; default to 'USER'
         const role = data.role?.toUpperCase() || 'USER';
 
-        // Store essential user info in cookies
-        Cookies.set('userId', String(data.userId), { secure: true, sameSite: 'strict' });
-        Cookies.set('mobileNo', mobileNo, { secure: true, sameSite: 'strict' });
-        Cookies.set('userRole', role, { secure: true, sameSite: 'strict' });
-
-        // Optionally, combine user info into one cookie object
-        const userData = {
-          userId: data.userId,
-          mobileNo,
-          role,
-          isLoggedIn: true,
+        // Cookie options - conditionally apply secure flag
+        const cookieOptions = {
+          expires: 7, // 7 days
+          sameSite: 'strict' as const,
+          // Only use secure in production (HTTPS)
+          ...(typeof window !== 'undefined' && window.location.protocol === 'https:' && { secure: true })
         };
-        Cookies.set('user', JSON.stringify(userData), { secure: true, sameSite: 'strict' });
 
-        // Show success message and redirect after a delay.
-        setSuccessMessage('Login successful! Redirecting...');
-        setShowSuccessMessage(true);
+        try {
+          // Store essential user info in cookies
+          Cookies.set('userId', String(data.userId), cookieOptions);
+          Cookies.set('mobileNo', mobileNo, cookieOptions);
+          Cookies.set('userRole', role, cookieOptions);
 
-        const redirectTo = searchParams?.get('redirect');
-        setTimeout(() => {
-          if (redirectTo) {
-            router.push(redirectTo);
-          } else {
-            if (role === 'ADMIN') {
-              router.push('/admin/dashboard');
-            } else if (role === 'VENDOR') {
-              router.push('/vendor/dashboard');
-            } else if (role === 'DRIVER') {
-              router.push('/driver/dashboard');
-            } else {
-              // For USER role or any other cases
-              router.push('/');
-            }
+          // Create user data object
+          const userData = {
+            userId: data.userId,
+            mobileNo,
+            role,
+            isLoggedIn: true,
+            loginTime: new Date().toISOString()
+          };
+
+          // Store combined user data
+          Cookies.set('user', JSON.stringify(userData), cookieOptions);
+
+          // Log for debugging
+          console.log('Cookies set successfully:', {
+            userId: data.userId,
+            mobileNo,
+            role,
+            userData
+          });
+
+          // Verify cookies were set
+          const verifyUserId = Cookies.get('userId');
+          const verifyUser = Cookies.get('user');
+          
+          console.log('Cookie verification:', {
+            verifyUserId,
+            verifyUser,
+            allCookies: document.cookie
+          });
+
+          if (!verifyUserId || !verifyUser) {
+            console.error('Failed to set cookies:', { verifyUserId, verifyUser });
+            setError('Failed to save login information. Please try again.');
+            setPassword('');
+            return;
           }
-        }, 2000);
+
+          // Show success message and redirect after a delay
+          setSuccessMessage('Login successful! Redirecting...');
+          setShowSuccessMessage(true);
+
+          const redirectTo = searchParams?.get('redirect');
+          setTimeout(() => {
+            if (redirectTo) {
+              router.push(redirectTo);
+            } else {
+              switch (role) {
+                case 'ADMIN':
+                  router.push('/admin/dashboard');
+                  break;
+                case 'VENDOR':
+                  router.push('/vendor/dashboard');
+                  break;
+                case 'DRIVER':
+                  router.push('/driver/dashboard');
+                  break;
+                default:
+                  // For USER role or any other cases
+                  router.push('/');
+              }
+            }
+          }, 2000);
+
+        } catch (cookieError) {
+          console.error('Error setting cookies:', cookieError);
+          setError('Failed to save login information. Please try again.');
+          setPassword('');
+        }
       } else {
         // If the API returns an error message, clear the password field and show the error.
         setPassword('');
