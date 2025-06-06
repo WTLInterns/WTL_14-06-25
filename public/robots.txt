@@ -3,7 +3,7 @@ User-agent: *
 Allow: /
 
 # Host
-Host: https://www.worldtriplink.com
+Host: https://worldtriplink.com
 
 # Sitemaps
-Sitemap: https://www.worldtriplink.com/sitemap.xml
+Sitemap: https://worldtriplink.com/sitemap.xml

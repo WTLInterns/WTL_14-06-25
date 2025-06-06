@@ -1,191 +1,98 @@
-"use client";
+import Image from "next/image"
+import Link from "next/link"
+import { Check } from "lucide-react"
 
-import React, { useState } from 'react';
-import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock } from 'react-icons/fa';
-// import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
-import Navbar2 from '@/components/Navbar2';
-import FloatingIcons from '@/components/FloatingIcons';
-
-const Contact = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: ''
-  });
-
-  // Kharadi, Pune coordinates
-  const mapCenter = {
-    lat: 18.5529,
-    lng: 73.9422
-  };
-
-  const mapContainerStyle = {
-    width: '100%',
-    height: '400px'
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle form submission logic here
-    console.log('Form submitted:', formData);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
+export default function AppPromotion() {
   return (
-    <>
-      <Navbar2 />
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      
-      {/* Hero Section */}
-      <div className="relative h-[40vh] bg-gradient-to-r from-blue-600 to-purple-600">
-        <div className="absolute inset-0 bg-black/50" />
-        <div className="relative h-full flex items-center justify-center">
-          <div className="text-center text-white">
-            <h1 className="text-4xl md:text-6xl font-bold mb-4">Contact Us</h1>
-            <p className="text-xl md:text-2xl">We'd love to hear from you</p>
-          </div>
-        </div>
-      </div>
+    <section className="py-16 bg-gradient-to-br from-blue-600 to-purple-600 text-white">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+          <div className="space-y-6">
+            <h2 className="text-4xl md:text-5xl font-bold">WTL Android and iOS App is Available!</h2>
+            <p className="text-xl">Travel smarter with our all-in-one mobile solution</p>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          {/* Contact Information */}
-          <div className="space-y-8">
-            <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <h2 className="text-2xl font-bold text-gray-800 mb-6">Get in Touch</h2>
-              
-              <div className="space-y-6">
-                <div className="flex items-start space-x-4">
-                  <div className="bg-blue-100 p-3 rounded-full">
-                    <FaMapMarkerAlt className="text-blue-600 text-xl" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-800">Our Location</h3>
-                    <p className="text-gray-600">Kharadi, Pune, Maharashtra 411014</p>
-                  </div>
-                </div>
+            <ul className="space-y-4">
+              <li className="flex items-center gap-3">
+                <span className="bg-white/20 rounded-full p-1">
+                  <Check className="h-5 w-5" />
+                </span>
+                <span>Access and change your itinerary on-the-go</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <span className="bg-white/20 rounded-full p-1">
+                  <Check className="h-5 w-5" />
+                </span>
+                <span>Free cancellation on select hotels</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <span className="bg-white/20 rounded-full p-1">
+                  <Check className="h-5 w-5" />
+                </span>
+                <span>Get real-time trip updates</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <span className="bg-white/20 rounded-full p-1">
+                  <Check className="h-5 w-5" />
+                </span>
+                <span>Exclusive mobile-only deals</span>
+              </li>
+            </ul>
 
-                <div className="flex items-start space-x-4">
-                  <div className="bg-green-100 p-3 rounded-full">
-                    <FaPhone className="text-green-600 text-xl" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-800">Phone Number</h3>
-                    <p className="text-gray-600">+91 9730545491</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-4">
-                  <div className="bg-purple-100 p-3 rounded-full">
-                    <FaEnvelope className="text-purple-600 text-xl" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-800">Email Address</h3>
-                    <p className="text-gray-600">info@wtltourism.com</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-4">
-                  <div className="bg-yellow-100 p-3 rounded-full">
-                    <FaClock className="text-yellow-600 text-xl" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-800">Working Hours</h3>
-                    <p className="text-gray-600">Monday - Friday: 9:00 AM - 6:00 PM</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Contact Form */}
-          <div className="bg-white p-8 rounded-xl shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Send us a Message</h2>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                  Your Name
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
-                  Subject
-                </label>
-                <input
-                  type="text"
-                  id="subject"
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-                  Message
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  rows={4}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                ></textarea>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105"
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="#"
+                className="bg-white rounded-lg px-6 py-3 flex items-center gap-2 text-gray-900 hover:bg-gray-100 transition-colors"
               >
-                Send Message
-              </button>
-            </form>
+                <Image
+                  src="/images/app_store.png"
+                  alt="App Store"
+                  width={24}
+                  height={24}
+                  className="object-contain"
+                />
+                <span className="font-medium">App Store</span>
+              </Link>
+              <a
+                href="https://play.google.com/store/apps/details?id=com.yourcompany.worldtriplink&hl=en"
+                className="bg-white rounded-lg px-6 py-3 flex items-center gap-2 text-gray-900 hover:bg-gray-100 transition-colors"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Image
+                  src="/images/play_store.jpg"
+                  alt="Google Play"
+                  width={24}
+                  height={24}
+                  className="object-contain"
+                />
+                <span className="font-medium">Google Play</span>
+              </a>
+            </div>
           </div>
+
+          <div className="flex justify-center">
+  <a
+    href="https://play.google.com/store/apps/details?id=com.yourcompany.worldtriplink&hl=en"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Open WTL Tourism Car Rental app on Google Play Store"
+    style={{ display: 'block' }}
+  >
+    <div className="relative w-64 h-[500px] cursor-pointer hover:scale-105 transition-transform">
+      <div className="absolute inset-0 rounded-[40px] border-8 border-black overflow-hidden">
+        <Image
+          src="/images/app_logo.jpeg"
+          alt="Mobile app screenshot"
+          fill
+          className="object-cover"
+        />
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/50 rounded-full"></div>
+      </div>
+    </div>
+  </a>
+</div>
         </div>
       </div>
-      <FloatingIcons />
-    </div>
-    </> 
-  );
-};
-
-export default Contact;
+    </section>
+  )
+}
