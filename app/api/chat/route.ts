@@ -1,50 +1,66 @@
-import { NextResponse } from 'next/server';
-import OpenAI from 'openai';
+import { NextRequest, NextResponse } from 'next/server';
 
-// Replace this with your DeepSeek or OpenRouter API key
-const openai = new OpenAI({
-  baseURL: 'https://openrouter.ai/api/v1',
-  apiKey: process.env.OPENAI_API_KEY || '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',
-  defaultHeaders: {
-    'HTTP-Referer': 'https://worldtriplink.com',
-    'X-Title': 'WTL Tourism',
-  },
-});
+const GEMINI_API_KEY = "AIzaSyB73mYeWt79Q9zeLlbM79EHj6BwTiXkOXw";
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + GEMINI_API_KEY;
 
-// Website-specific context (replace with your actual FAQ/content or use a vector DB for RAG)
-const WEBSITE_CONTEXT = `\
-World Trip Link (https://worldtriplink.com/) is a cab booking platform for Maharashtra and India.\n\
-- Services: Outstation cabs, local rentals, airport transfers, corporate travel, holiday packages.\n\
-- Booking: Online booking, instant confirmation, 24/7 support.\n\
-- Contact: +91 9730545491, WhatsApp available.\n\
-- Payment: Multiple options, transparent pricing, no hidden charges.\n\
-- Popular routes: Mumbai, Pune, Nashik, Shirdi, Lonavala, Kolhapur, Aurangabad, and more.\n\
-- App: Android/iOS available.\n\
-- Only answer questions related to cab booking, our services, pricing, routes, or company info.\n\
-If a user asks anything unrelated to worldtriplink.com or cab booking, politely refuse and say: 'Sorry, I can only answer questions about cab booking and our services at worldtriplink.com.'\n`;
+// Website-specific context: Replace/add more details as needed for best results
+const WEBSITE_CONTEXT = `
+You are WTL AI, a helpful assistant for World Trip Link (https://worldtriplink.com/), a cab booking platform for Maharashtra and India. Only answer questions related to:
+- Cab booking, pricing, and vehicle types (Luxury, Hatchback, Sedan, etc.)
+- Booking process, payment, and cancellation
+- Service cities (Mumbai, Pune, Nashik, etc.)
+- Contact info: +91 9730545491
+- App features (Android/iOS), trip updates, and exclusive deals
+- Do NOT answer questions unrelated to cab booking or this website.
+If asked about anything else, politely say: "I'm here to help with cab bookings and information about World Trip Link only."
+`;
 
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.json();
-    const { messages } = body;
-    // Insert the website context as a system prompt
-    const systemPrompt = { role: 'system', content: WEBSITE_CONTEXT };
-    const filteredMessages = [systemPrompt, ...messages.filter((msg: any) => msg.role !== 'system')];
-    const completion = await openai.chat.completions.create({
-      model: 'openai/gpt-3.5-turbo',
-      messages: filteredMessages,
-      max_tokens: 700,
-      temperature: 0.2,
-    });
-    return NextResponse.json(completion.choices[0].message);
-  } catch (error: any) {
-    return NextResponse.json(
-      {
-        error: 'An error occurred while processing your request',
-        details: error.message,
-        code: error.status || error.code
+    const { messages } = await req.json();
+    if (!messages || !Array.isArray(messages)) {
+      return NextResponse.json({ error: 'Invalid request: messages missing.' }, { status: 400 });
+    }
+
+    // Prepare the prompt for Gemini: system context + user conversation
+    const prompt = [
+      { role: 'system', content: WEBSITE_CONTEXT },
+      ...messages.map((msg: any) => ({ role: msg.role, content: msg.content }))
+    ];
+
+    // Gemini expects a different format than OpenAI
+    const geminiMessages = prompt.map((msg) => ({
+      role: msg.role === 'system' ? 'user' : msg.role, // Gemini doesn't support 'system', so prepend as user
+      parts: [{ text: msg.content }]
+    }));
+
+    // Call Gemini API
+    const response = await fetch(GEMINI_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
-      { status: error.status || error.code || 500 }
-    );
+      body: JSON.stringify({
+        contents: geminiMessages,
+        generationConfig: {
+          temperature: 0.3,
+          topP: 1,
+          maxOutputTokens: 512
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      return NextResponse.json({ error: 'Gemini API error: ' + error }, { status: 500 });
+    }
+
+    const data = await response.json();
+    // Gemini's response structure
+    const aiMessage = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not generate a response.';
+
+    return NextResponse.json({ role: 'assistant', content: aiMessage });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || 'Unknown error.' }, { status: 500 });
   }
 }
