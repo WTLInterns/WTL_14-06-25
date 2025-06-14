@@ -14,14 +14,14 @@ import HolidayBookingForm from "@/components/HolidayBookingForm";
 import FloatingIcons from "@/components/FloatingIcons";
 import Head from "next/head";
 
-<Head>
+{/* <Head>
 <title>Corporate Cab Services in Telangana | Reliable Employee Transport</title>
     <meta name="description" content="WTL Tourism Pvt. Ltd. offers professional corporate cab services in Telangana. Get safe, on-time, and hassle-free employee transportation tailored to your business needs."/>
     <link rel="canonical" href="https://www.worldtriplink.com/corporate/Corporate-Cab-Services-Telangana"/>
     <meta name="author" content="WTL Tourism"/>
     <meta name="keywords" content="corporate cab services in Telangana, employee transportation services in Telangana"/>
     <meta name="robots" content="index, follow"/>
-</Head>
+</Head> */}
 
 
 // Counter hook for animated numbers
