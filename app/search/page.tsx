@@ -716,4 +716,3 @@ function SearchResultsContent() {
     </div>
   );
 }
-
