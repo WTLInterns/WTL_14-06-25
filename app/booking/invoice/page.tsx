@@ -182,7 +182,7 @@ function InvoiceContent() {
 
     try {
       const response = await fetch(
-        "http://localhost:8080/api/invoice1",
+        "https://api.worldtriplink.com/api/invoice1",
         {
           method: "POST",
           headers: {
@@ -290,7 +290,7 @@ function InvoiceContent() {
 
     try {
       const response = await fetch(
-        "http://localhost:8080/api/bookingConfirm",
+        "https://api.worldtriplink.com/api/bookingConfirm",
         {
           method: "POST",
           headers: {
@@ -350,7 +350,7 @@ function InvoiceContent() {
           </div>
         )}
 
-        
+
 
         {/* Header */}
         <div className="text-center mb-6">
