@@ -153,13 +153,13 @@ function SearchResultsContent() {
       params.append('date', searchParams.get('date') || '');
       params.append('time', searchParams.get('time') || '');
       params.append('Returndate', searchParams.get('Returndate') || '');
-  
+      params.append('packageName', searchParams.get('packageName') || '');
       // 2. Add debug logging
       console.log('Sending params:', Object.fromEntries(params));
   
       // 3. Make the request with identical Postman configuration
       const response = await axios.post(
-        'https://api.worldtriplink.com/api/cab1',
+        'http://localhost:8080/api/cab1',
         params.toString(),
         {
           // headers: {
@@ -597,7 +597,7 @@ function SearchResultsContent() {
                                   {option}
                                 </label>
                               </div>
-                            ))}
+                            ))} 
                           </div>
                         )}
                       </div>
@@ -679,6 +679,7 @@ function SearchResultsContent() {
                           Returndate: searchParams.get('Returndate') || '',
                           time: searchParams.get('time') || '',
                           tripType: searchParams.get('tripType') || 'oneWay',
+                          packageName : searchParams.get('packageName') || '',
                           distance: distance?.toString() || '0',
                           days: days.toString(),
                           features: JSON.stringify(car.features || []),

@@ -21,6 +21,8 @@ interface CarData {
   tripType: string;
   distance: string;
   days: string;
+  packageName: string;
+  estimatedTravelTime: string;
 }
 
 interface FormData {
@@ -60,6 +62,8 @@ function InvoiceContent() {
     tripType: "oneWay",
     distance: "0",
     days: "0",
+    packageName: "",
+    estimatedTravelTime: "",
   });
 
   // Booking form state
@@ -104,6 +108,8 @@ function InvoiceContent() {
     const tripType = searchParams.get("tripType") || "oneWay";
     const distance = searchParams.get("distance") || "0";
     const days = searchParams.get("days") || "0";
+    const packageName = searchParams.get("packageName") || "";
+    const estimatedTravelTime = searchParams.get("estimatedTravelTime") || "";
 
     setCarData({
       name,
@@ -119,6 +125,8 @@ function InvoiceContent() {
       tripType,
       distance,
       days,
+      packageName,
+      estimatedTravelTime,
     });
 
     // Prefill form fields if user is logged in
@@ -168,12 +176,13 @@ function InvoiceContent() {
       tripType: carData.tripType,
       distance: carData.distance,
       days: carData.days,
+      packageName: carData.packageName,
       // userId: userId?.toString() || ""
     });
 
     try {
       const response = await fetch(
-        "https://api.worldtriplink.com/api/invoice1",
+        "http://localhost:8080/api/invoice1",
         {
           method: "POST",
           headers: {
@@ -188,27 +197,6 @@ function InvoiceContent() {
         throw new Error("Network response was not ok");
       }
 
-      // Example response from API:
-      // {
-      //   "date": "2025-02-08",
-      //   "distance": "11",
-      //   "returndate": "2025-02-08",
-      //   "gst": 720,
-      //   "dropLocation": "Mumbai, Maharashtra, India",
-      //   "modelType": "hatchback",
-      //   "availability": null,
-      //   "pickupLocation": "Pune, Maharashtra, India",
-      //   "seats": "3",
-      //   "driverrate": 300,
-      //   "modelName": "maruti",
-      //   "total": 6072,
-      //   "tripType": "roundTrip",
-      //   "fuelType": null,
-      //   "service": 480,
-      //   "price": "4572",
-      //   "days": "1",
-      //   "time": "02:45"
-      // }
       const data = await response.json();
       console.log("Pricing data from API:", data);
 
@@ -250,7 +238,7 @@ function InvoiceContent() {
   };
 
   // Submit booking data to websiteBooking endpoint
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.MouseEvent) => {
     e.preventDefault();
 
     // Validate phone
@@ -297,11 +285,12 @@ function InvoiceContent() {
       days: carData.days,
       driverrate: "0",
       userId: userId?.toString() || "",
+      packageName: carData.packageName,
     });
 
     try {
       const response = await fetch(
-        "https://api.worldtriplink.com/api/bookingConfirm",
+        "http://localhost:8080/api/bookingConfirm",
         {
           method: "POST",
           headers: {
@@ -342,6 +331,7 @@ function InvoiceContent() {
   };
 
   return (
+    
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-4 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
         {/* Success Message */}
@@ -359,6 +349,8 @@ function InvoiceContent() {
             </span>
           </div>
         )}
+
+        
 
         {/* Header */}
         <div className="text-center mb-6">
@@ -423,8 +415,10 @@ function InvoiceContent() {
                       <p className="font-semibold">Available</p>
                     </div>
                   </div>
+                  
                   <div className="border-t border-white/20 pt-4 mt-4">
                     <div className="space-y-2">
+                      {/* Round Trip Invoice */}
                       {carData.tripType === "roundTrip" && (
                         <>
                           <div className="flex justify-between items-center">
@@ -447,106 +441,136 @@ function InvoiceContent() {
                             </span>
                           </div>
 
+                          <div className="flex items-center justify-center gap-5 my-6">
+                            <div className="flex-1 h-0.5 bg-gradient-to-r from-transparent via-white to-transparent"></div>
+                            <h1 className="text-2xl font-bold text-white px-4">Invoice</h1>
+                            <div className="flex-1 h-0.5 bg-gradient-to-r from-transparent via-white to-transparent"></div>
+                          </div>
+                          
+                          <div className="flex justify-between items-center">
+                            <span className="text-blue-200">Base Fare</span>
+                            <span className="font-semibold">₹{carData.price}</span>
+                          </div>
+                          
+                          <div className="flex justify-between items-center">
+                            <span className="text-blue-200">Driver Rate (DriverRate * days)</span>
+                            <span className="font-semibold">₹{driverrate * carData.days}</span>
+                          </div>
 
-<div className="flex items-center justify-center gap-5 my-6">
-  <div className="flex-1 h-0.5 bg-gradient-to-r from-transparent via-white to-transparent"></div>
-  <h1 className="text-2xl font-bold text-white px-4">Invoice</h1>
-  <div className="flex-1 h-0.5 bg-gradient-to-r from-transparent via-white to-transparent"></div>
-</div>
-                        <div className="flex justify-between items-center">
-                        <span className="text-blue-200">Base Fare</span>
-                        <span className="font-semibold">₹{carData.price}</span>
-                      </div>
-                        <div className="flex justify-between items-center">
-                        <span className="text-blue-200">Driver Rate (DriverRate * days)</span>
-                        <span className="font-semibold">₹{driverrate * carData.days}</span>
-                      </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-blue-200">Amount(DriverRate+BaseFare)</span>
+                            <span className="font-semibold">₹{driverrate * carData.days +carData.price}</span>
+                          </div>
+                          
+                          <div className="flex justify-between items-center">
+                            <span className="text-blue-200">GST(5%)</span>
+                            <span className="font-semibold">₹{(driverrate * carData.days +carData.price)*0.05}</span>
+                          </div>
 
-                        <div className="flex justify-between items-center">
-                        <span className="text-blue-200">Amount(DriverRate+BaseFare)</span>
-                        <span className="font-semibold">₹{driverrate * carData.days +carData.price}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-blue-200">GST(5%)</span>
-                        <span className="font-semibold">₹{(driverrate * carData.days +carData.price)*0.05}</span>
-                      </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-blue-200">Service Charge(10%)</span>
+                            <span className="font-semibold">₹{(driverrate * carData.days +carData.price)*0.10}</span>
+                          </div>
 
-                      <div className="flex justify-between items-center">
-                        <span className="text-blue-200">Service Charge(10%)</span>
-                        <span className="font-semibold">₹{(driverrate * carData.days +carData.price)*0.10}</span>
-                      </div>
-
-                       <div className="flex justify-between items-center text-xl mt-3 pt-3 border-t border-white/20">
-                        <span className="font-bold">Total Amount:</span>
-                        <span className="font-bold text-2xl">
-₹ {((driverrate * carData.days + carData.price) + ((driverrate * carData.days + carData.price) * 0.05) + ((driverrate * carData.days + carData.price) * 0.10)).toFixed(2)}
-                         
-                        </span>
-                      </div>
-
-
-
-
-
+                          <div className="flex justify-between items-center text-xl mt-3 pt-3 border-t border-white/20">
+                            <span className="font-bold">Total Amount:</span>
+                            <span className="font-bold text-2xl">
+                              ₹ {((driverrate * carData.days + carData.price) + ((driverrate * carData.days + carData.price) * 0.05) + ((driverrate * carData.days + carData.price) * 0.10)).toFixed(2)}
+                            </span>
+                          </div>
                         </>
                       )}
-                    
-                      {/* {carData.tripType==='roundTrip' && (<div className="flex justify-between items-center">
-                        <span className="text-blue-200">Driver Rate (DriverRate * days)</span>
-                        <span className="font-semibold">₹{driverrate * carData.days}</span>
-                      </div>)} */}
-                      {/* {pricing.isCalculated && pricing.driverrate > 0 && (
-                        <div className="flex justify-between items-center">
-                          <span className="text-blue-200">
-                            Driver Allowance:
-                          </span>
-                          <span className="font-semibold">
-                            ₹{driverrate}
-                          </span>
-                        </div>
-                      )} */}
-                     {carData.tripType==='oneWay' && (<> 
-                      <div className="flex justify-between items-center">
-                        <span className="text-blue-200">Base Fare</span>
-                        <span className="font-semibold">₹{carData.price}</span>
-                      </div>
-                     <div className="flex justify-between items-center">
-                      
-                        <span className="text-blue-200">Service Charge:</span>
-                        <span className="font-semibold">
-                          ₹
-                          {pricing.isCalculated
-                            ? pricing.service
-                            : Math.round(carData.price * 0.1)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-blue-200">GST:</span>
-                        <span className="font-semibold">
-                          ₹
-                          {pricing.isCalculated
-                            ? pricing.gst
-                            : Math.round(carData.price * 0.05)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center text-xl mt-3 pt-3 border-t border-white/20">
-                        <span className="font-bold">Total Amount:</span>
-                        <span className="font-bold text-2xl">
-                          ₹
-                          {pricing.isCalculated
-                            ? pricing.total
-                            : carData.price +
-                              Math.round(carData.price * 0.1) +
-                              Math.round(carData.price * 0.05)}
-                        </span>
-                      </div></>)}
-                      {/* {pricing.isCalculated && (
-                        <div className="mt-2 text-center bg-white/20 p-1 rounded-lg">
-                          <span className="text-white text-sm">
-                            Pricing calculated by server
-                          </span>
-                        </div>
-                      )} */}
+
+                      {/* One Way Invoice */}
+                      {carData.tripType === 'oneWay' && (
+                        <> 
+                          <div className="flex justify-between items-center">
+                            <span className="text-blue-200">Base Fare</span>
+                            <span className="font-semibold">₹{carData.price}</span>
+                          </div>
+                          
+                          <div className="flex justify-between items-center">
+                            <span className="text-blue-200">Service Charge:</span>
+                            <span className="font-semibold">
+                              ₹
+                              {pricing.isCalculated
+                                ? pricing.service
+                                : Math.round(carData.price * 0.1)}
+                            </span>
+                          </div>
+                          
+                          <div className="flex justify-between items-center">
+                            <span className="text-blue-200">GST:</span>
+                            <span className="font-semibold">
+                              ₹
+                              {pricing.isCalculated
+                                ? pricing.gst
+                                : Math.round(carData.price * 0.05)}
+                            </span>
+                          </div>
+                          
+                          <div className="flex justify-between items-center text-xl mt-3 pt-3 border-t border-white/20">
+                            <span className="font-bold">Total Amount:</span>
+                            <span className="font-bold text-2xl">
+                              ₹
+                              {pricing.isCalculated
+                                ? pricing.total
+                                : carData.price +
+                                  Math.round(carData.price * 0.1) +
+                                  Math.round(carData.price * 0.05)}
+                            </span>
+                          </div>
+                        </>
+                      )}
+
+                      {/* Rental Invoice */}
+                      {carData.tripType === 'rental' && (
+                        <>
+                          <div className="flex justify-between items-center">
+                            <span className="text-blue-200">Package:</span>
+                            <span className="font-semibold">{carData.packageName}</span>
+                          </div>
+                          
+                          {carData.estimatedTravelTime && (
+                            <div className="flex justify-between items-center">
+                              <span className="text-blue-200">Estimated Travel Time:</span>
+                              <span className="font-semibold">{carData.estimatedTravelTime}</span>
+                            </div>
+                          )}
+
+                          <div className="flex items-center justify-center gap-5 my-6">
+                            <div className="flex-1 h-0.5 bg-gradient-to-r from-transparent via-white to-transparent"></div>
+                            <h1 className="text-2xl font-bold text-white px-4">Invoice</h1>
+                            <div className="flex-1 h-0.5 bg-gradient-to-r from-transparent via-white to-transparent"></div>
+                          </div>
+
+                          <div className="flex justify-between items-center">
+                            <span className="text-blue-200">Base Amount:</span>
+                            <span className="font-semibold">₹{carData.price}</span>
+                          </div>
+                          
+                          <div className="flex justify-between items-center">
+                            <span className="text-blue-200">GST (5%):</span>
+                            <span className="font-semibold">
+                              ₹{Math.round(carData.price * 0.05)}
+                            </span>
+                          </div>
+
+                          <div className="flex justify-between items-center">
+                            <span className="text-blue-200">Service Charge (10%):</span>
+                            <span className="font-semibold">
+                              ₹{Math.round(carData.price * 0.10)}
+                            </span>
+                          </div>
+
+                          <div className="flex justify-between items-center text-xl mt-3 pt-3 border-t border-white/20">
+                            <span className="font-bold">Total Amount:</span>
+                            <span className="font-bold text-2xl">
+                              ₹{carData.price + Math.round(carData.price * 0.05) + Math.round(carData.price * 0.10)}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -576,12 +600,14 @@ function InvoiceContent() {
                     <p className="text-xs text-gray-500">Date</p>
                     <p className="font-medium text-gray-800">{carData.date}</p>
                   </div>
-                 {carData.tripType==='roundTrip' && ( <div className="bg-gray-50 p-3 rounded-lg">
-                    <p className="text-xs text-gray-500">Return Date</p>
-                    <p className="font-medium text-gray-800">
-                      {carData.returnDate}
-                    </p>
-                  </div>)}
+                  {carData.tripType === 'roundTrip' && ( 
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <p className="text-xs text-gray-500">Return Date</p>
+                      <p className="font-medium text-gray-800">
+                        {carData.returnDate}
+                      </p>
+                    </div>
+                  )}
                   <div className="bg-gray-50 p-3 rounded-lg">
                     <p className="text-xs text-gray-500">Time</p>
                     <p className="font-medium text-gray-800">{carData.time}</p>
@@ -592,6 +618,22 @@ function InvoiceContent() {
                       {carData.tripType}
                     </p>
                   </div>
+                  {carData.tripType === 'rental' && carData.packageName && (
+                    <div className="bg-gray-50 p-3 rounded-lg col-span-2">
+                      <p className="text-xs text-gray-500">Package</p>
+                      <p className="font-medium text-gray-800">
+                        {carData.packageName}
+                      </p>
+                    </div>
+                  )}
+                  {carData.tripType === 'rental' && carData.estimatedTravelTime && (
+                    <div className="bg-gray-50 p-3 rounded-lg col-span-2">
+                      <p className="text-xs text-gray-500">Estimated Travel Time</p>
+                      <p className="font-medium text-gray-800">
+                        {carData.estimatedTravelTime}
+                      </p>
+                    </div>
+                  )}
                   <div className="bg-gray-50 p-3 rounded-lg col-span-2">
                     <p className="text-xs text-gray-500">Distance</p>
                     <p className="font-medium text-gray-800">
@@ -601,20 +643,8 @@ function InvoiceContent() {
                 </div>
               </div>
 
-              {/* Pricing Button */}
-              {/* {!pricing.isCalculated && (
-                <div className="mb-6">
-                  <button
-                    onClick={calculatePricing}
-                    disabled={isSubmitting}
-                    className="w-full bg-green-600 text-white py-2 rounded-lg font-bold text-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-300">
-                    Calculate Pricing
-                  </button>
-                </div>
-              )} */}
-
               {/* Booking Form */}
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Name
@@ -671,7 +701,10 @@ function InvoiceContent() {
                   )}
                 </div>
                 <button
-                  type="submit"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleSubmit(e);
+                  }}
                   disabled={isSubmitting}
                   className={`w-full relative overflow-hidden ${
                     isSubmitting
@@ -688,7 +721,7 @@ function InvoiceContent() {
                     "Book Now"
                   )}
                 </button>
-              </form>
+              </div>
             </div>
           </div>
         </div>

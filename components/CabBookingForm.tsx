@@ -108,6 +108,7 @@ useEffect(() => {
 
   const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlot[]>([])
   const [isLoadingTimeSlots, setIsLoadingTimeSlots] = useState(false)
+  const[packageName, setPackageName]=useState("")
 
   
   const [userName, setUserName] = useState("")
@@ -336,7 +337,7 @@ useEffect(() => {
     try {
       console.log("Calculating distance between:", origin, "and", destination)
 
-      const response = await fetch("https://api.worldtriplink.com/api/cab1", {
+      const response = await fetch("http://localhost:8080/api/cab1", {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -449,6 +450,7 @@ useEffect(() => {
       distance: calculatedDistance ? calculatedDistance.toString() : "0",
       name: userName,
       mobile: mobileNumber,
+      packageName : packageName || ""
     })
 
     router.push(`/search?${searchParams.toString()}`)
@@ -498,8 +500,8 @@ useEffect(() => {
               <input
                 type="radio"
                 name="tripType"
-                value="rental-trip"
-                checked={tripType === "rental-trip"}
+                value="rental"
+                checked={tripType === "rental"}
                 onChange={(e) => setTripType(e.target.value)}
                 className="form-radio text-emerald-500 focus:ring-emerald-500"
                 required
@@ -507,6 +509,43 @@ useEffect(() => {
               <span className="text-white">Rental Trip</span>
             </label>
           </div>
+
+          {/* Package Selection for Rental Trip */}
+          {tripType === "rental" && (
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+              <label className="block text-sm font-medium text-white mb-3">
+                Select Package
+              </label>
+              <div className="relative">
+                <select
+                  name="packageName"
+                  value={packageName}
+                  onChange={(e) => setPackageName(e.target.value)}
+                  className="w-full p-3 pr-10 border border-white/20 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white/20 text-white appearance-none cursor-pointer"
+                  required
+                >
+                  <option value="" disabled className="bg-gray-800 text-white">
+                    Choose a package...
+                  </option>
+                  <option value="4hrs/40Km" className="bg-gray-800 text-white">
+                    4hrs/40Km - Perfect for city tours
+                  </option>
+                  <option value="8hrs/80Km" className="bg-gray-800 text-white">
+                    8hrs/80Km - Ideal for outstation trips
+                  </option>
+                </select>
+                {/* Custom dropdown arrow */}
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+              <div className="mt-2 text-xs text-white/70">
+                Choose your rental package based on duration and distance needs
+              </div>
+            </div>
+          )}
 
           {/* Location and Time Selection */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -542,18 +581,20 @@ useEffect(() => {
               </div>
             </div>
 
-            {/* Drop Location */}
+            {/* Drop Location - Modified for Rental Trip */}
             <div>
-              <label className="block text-sm font-medium text-white mb-1">Drop Location</label>
+              <label className="block text-sm font-medium text-white mb-1">
+                {tripType === "rental" ? "Drop Location (Optional)" : "Drop Location"}
+              </label>
               <div className="relative">
                 <input
                   ref={dropRef}
                   type="text"
-                  placeholder="Enter drop location"
+                  placeholder={tripType === "rental" ? "Enter drop location (optional)" : "Enter drop location"}
                   value={dropLocation}
                   onChange={(e) => setDropLocation(e.target.value)}
                   className="w-full p-3 pl-10 border border-white/20 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white/20 text-white placeholder-white/70"
-                  required
+                  required={tripType !== "rental"}
                 />
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg className="h-5 w-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -572,6 +613,11 @@ useEffect(() => {
                   </svg>
                 </div>
               </div>
+              {tripType === "rental" && (
+                <div className="mt-1 text-xs text-white/60">
+                  For rental trips, drop location is optional
+                </div>
+              )}
             </div>
 
             {/* Pickup Date */}
@@ -579,27 +625,27 @@ useEffect(() => {
               <label className="block text-sm font-medium text-white mb-1">Pickup Date</label>
               <div className="relative">
                 <div className="relative">
-  <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-    <svg className="h-5 w-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-    </svg>
-  </span>
-  <input
-    id="pickupDate"
-    type="date"
-    value={pickupDate}
-    onChange={(e) => handleDateSelection(e.target.value, "pickup")}
-    min={today}
-    className="w-full p-3 pl-10 border border-white/20 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white/20 text-white hide-native-picker"
-    required
-    ref={pickupDateRef}
-    onClick={() => {
-      if (pickupDateRef.current && typeof pickupDateRef.current.showPicker === 'function') {
-        pickupDateRef.current.showPicker();
-      }
-    }}
-  />
-</div>
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg className="h-5 w-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </span>
+                  <input
+                    id="pickupDate"
+                    type="date"
+                    value={pickupDate}
+                    onChange={(e) => handleDateSelection(e.target.value, "pickup")}
+                    min={today}
+                    className="w-full p-3 pl-10 border border-white/20 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white/20 text-white hide-native-picker"
+                    required
+                    ref={pickupDateRef}
+                    onClick={() => {
+                      if (pickupDateRef.current && typeof pickupDateRef.current.showPicker === 'function') {
+                        pickupDateRef.current.showPicker();
+                      }
+                    }}
+                  />
+                </div>
               </div>
             </div>
 
@@ -609,27 +655,27 @@ useEffect(() => {
                 <label className="block text-sm font-medium text-white mb-1">Return Date</label>
                 <div className="relative">
                   <div className="relative">
-  <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-    <svg className="h-5 w-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-    </svg>
-  </span>
-  <input
-    id="Returndate"
-    type="date"
-    value={Returndate}
-    onChange={(e) => handleDateSelection(e.target.value, "return")}
-    min={pickupDate || today}
-    className="w-full p-3 pl-10 border border-white/20 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white/20 text-white hide-native-picker"
-    required
-    ref={returnDateRef}
-    onClick={() => {
-      if (returnDateRef.current && typeof returnDateRef.current.showPicker === 'function') {
-        returnDateRef.current.showPicker();
-      }
-    }}
-  />
-</div>
+                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </span>
+                    <input
+                      id="Returndate"
+                      type="date"
+                      value={Returndate}
+                      onChange={(e) => handleDateSelection(e.target.value, "return")}
+                      min={pickupDate || today}
+                      className="w-full p-3 pl-10 border border-white/20 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white/20 text-white hide-native-picker"
+                      required
+                      ref={returnDateRef}
+                      onClick={() => {
+                        if (returnDateRef.current && typeof returnDateRef.current.showPicker === 'function') {
+                          returnDateRef.current.showPicker();
+                        }
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
             )}
@@ -639,26 +685,26 @@ useEffect(() => {
               <label className="block text-sm font-medium text-white mb-1">Pickup Time</label>
               <div className="relative">
                 <div className="relative">
-  <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-    <svg className="h-5 w-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  </span>
-  <input
-    id="pickupTime"
-    type="time"
-    value={pickupTime}
-    onChange={(e) => setPickupTime(e.target.value)}
-    className="w-full p-3 pl-10 border border-white/20 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white/20 text-white hide-native-picker"
-    required
-    ref={pickupTimeRef}
-    onClick={() => {
-      if (pickupTimeRef.current && typeof pickupTimeRef.current.showPicker === 'function') {
-        pickupTimeRef.current.showPicker();
-      }
-    }}
-  />
-</div>
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg className="h-5 w-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </span>
+                  <input
+                    id="pickupTime"
+                    type="time"
+                    value={pickupTime}
+                    onChange={(e) => setPickupTime(e.target.value)}
+                    className="w-full p-3 pl-10 border border-white/20 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white/20 text-white hide-native-picker"
+                    required
+                    ref={pickupTimeRef}
+                    onClick={() => {
+                      if (pickupTimeRef.current && typeof pickupTimeRef.current.showPicker === 'function') {
+                        pickupTimeRef.current.showPicker();
+                      }
+                    }}
+                  />
+                </div>
                 {isLoadingTimeSlots && (
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
