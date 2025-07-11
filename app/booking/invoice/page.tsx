@@ -20,7 +20,7 @@ interface CarData {
   time: string;
   tripType: string;
   distance: string;
-  days: string;
+  days: number;
   packageName: string;
   estimatedTravelTime: string;
 }
@@ -61,7 +61,7 @@ function InvoiceContent() {
     time: "",
     tripType: "oneWay",
     distance: "0",
-    days: "0",
+    days: 0,
     packageName: "",
     estimatedTravelTime: "",
   });
@@ -107,7 +107,7 @@ function InvoiceContent() {
     const time = searchParams.get("time") || "";
     const tripType = searchParams.get("tripType") || "oneWay";
     const distance = searchParams.get("distance") || "0";
-    const days = searchParams.get("days") || "0";
+    const days = Number(searchParams.get("days")) || 0;
     const packageName = searchParams.get("packageName") || "";
     const estimatedTravelTime = searchParams.get("estimatedTravelTime") || "";
 
@@ -175,7 +175,7 @@ function InvoiceContent() {
       time: carData.time,
       tripType: carData.tripType,
       distance: carData.distance,
-      days: carData.days,
+      days: carData.days.toString(),
       packageName: carData.packageName,
       // userId: userId?.toString() || ""
     });
@@ -282,7 +282,7 @@ function InvoiceContent() {
       service: Math.round(carData.price * 0.1).toString(),
       gst: Math.round(carData.price * 0.05).toString(),
       total: carData.price.toString(),
-      days: carData.days,
+      days: carData.days.toString(),
       driverrate: "0",
       userId: userId?.toString() || "",
       packageName: carData.packageName,
@@ -419,67 +419,100 @@ function InvoiceContent() {
                   <div className="border-t border-white/20 pt-4 mt-4">
                     <div className="space-y-2">
                       {/* Round Trip Invoice */}
-                      {carData.tripType === "roundTrip" && (
-                        <>
-                          <div className="flex justify-between items-center">
-                            <span className="text-blue-200">Distance/Day:</span>
-                            <span className="font-semibold">
-                              300km
-                            </span>
-                          </div>
+                      {carData.tripType === "roundTrip" &&
+                        (() => {
+                          const baseFare = Number(carData.price);
+                          const numberOfDays = Number(carData.days);
+                          const driverCost = driverrate * numberOfDays;
+                          const subTotal = driverCost + baseFare;
+                          const gstAmount = subTotal * 0.05;
+                          const serviceCharge = subTotal * 0.1;
+                          const totalAmount = subTotal + gstAmount + serviceCharge;
 
-                          <div className="flex justify-between items-center">
-                            <span className="text-blue-200">
-                              Driver Bhata/Day
-                              <br />
-                              <small className="text-xs">
-                                (Fixed 300km/day in Round Trip)
-                              </small>
-                            </span>
-                            <span className="font-semibold">
-                              ₹{driverrate}
-                            </span>
-                          </div>
+                          return (
+                            <>
+                              <div className="flex justify-between items-center">
+                                <span className="text-blue-200">
+                                  Distance/Day:
+                                </span>
+                                <span className="font-semibold">300km</span>
+                              </div>
 
-                          <div className="flex items-center justify-center gap-5 my-6">
-                            <div className="flex-1 h-0.5 bg-gradient-to-r from-transparent via-white to-transparent"></div>
-                            <h1 className="text-2xl font-bold text-white px-4">Invoice</h1>
-                            <div className="flex-1 h-0.5 bg-gradient-to-r from-transparent via-white to-transparent"></div>
-                          </div>
-                          
-                          <div className="flex justify-between items-center">
-                            <span className="text-blue-200">Base Fare</span>
-                            <span className="font-semibold">₹{carData.price}</span>
-                          </div>
-                          
-                          <div className="flex justify-between items-center">
-                            <span className="text-blue-200">Driver Rate (DriverRate * days)</span>
-                            <span className="font-semibold">₹{driverrate * carData.days}</span>
-                          </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-blue-200">
+                                  Driver Bhata/Day
+                                  <br />
+                                  <small className="text-xs">
+                                    (Fixed 300km/day in Round Trip)
+                                  </small>
+                                </span>
+                                <span className="font-semibold">
+                                  ₹{driverrate}
+                                </span>
+                              </div>
 
-                          <div className="flex justify-between items-center">
-                            <span className="text-blue-200">Amount(DriverRate+BaseFare)</span>
-                            <span className="font-semibold">₹{driverrate * carData.days +carData.price}</span>
-                          </div>
-                          
-                          <div className="flex justify-between items-center">
-                            <span className="text-blue-200">GST(5%)</span>
-                            <span className="font-semibold">₹{(driverrate * carData.days +carData.price)*0.05}</span>
-                          </div>
+                              <div className="flex items-center justify-center gap-5 my-6">
+                                <div className="flex-1 h-0.5 bg-gradient-to-r from-transparent via-white to-transparent"></div>
+                                <h1 className="text-2xl font-bold text-white px-4">
+                                  Invoice
+                                </h1>
+                                <div className="flex-1 h-0.5 bg-gradient-to-r from-transparent via-white to-transparent"></div>
+                              </div>
 
-                          <div className="flex justify-between items-center">
-                            <span className="text-blue-200">Service Charge(10%)</span>
-                            <span className="font-semibold">₹{(driverrate * carData.days +carData.price)*0.10}</span>
-                          </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-blue-200">
+                                  Base Fare
+                                </span>
+                                <span className="font-semibold">
+                                  ₹{baseFare}
+                                </span>
+                              </div>
 
-                          <div className="flex justify-between items-center text-xl mt-3 pt-3 border-t border-white/20">
-                            <span className="font-bold">Total Amount:</span>
-                            <span className="font-bold text-2xl">
-                              ₹ {((driverrate * carData.days + carData.price) + ((driverrate * carData.days + carData.price) * 0.05) + ((driverrate * carData.days + carData.price) * 0.10)).toFixed(2)}
-                            </span>
-                          </div>
-                        </>
-                      )}
+                              <div className="flex justify-between items-center">
+                                <span className="text-blue-200">
+                                  Driver Rate (DriverRate * days)
+                                </span>
+                                <span className="font-semibold">
+                                  ₹{driverCost}
+                                </span>
+                              </div>
+
+                              <div className="flex justify-between items-center">
+                                <span className="text-blue-200">
+                                  Amount(DriverRate+BaseFare)
+                                </span>
+                                <span className="font-semibold">
+                                  ₹{subTotal}
+                                </span>
+                              </div>
+
+                              <div className="flex justify-between items-center">
+                                <span className="text-blue-200">GST(5%)</span>
+                                <span className="font-semibold">
+                                  ₹{gstAmount.toFixed(2)}
+                                </span>
+                              </div>
+
+                              <div className="flex justify-between items-center">
+                                <span className="text-blue-200">
+                                  Service Charge(10%)
+                                </span>
+                                <span className="font-semibold">
+                                  ₹{serviceCharge.toFixed(2)}
+                                </span>
+                              </div>
+
+                              <div className="flex justify-between items-center text-xl mt-3 pt-3 border-t border-white/20">
+                                <span className="font-bold">
+                                  Total Amount:
+                                </span>
+                                <span className="font-bold text-2xl">
+                                  ₹ {totalAmount.toFixed(2)}
+                                </span>
+                              </div>
+                            </>
+                          );
+                        })()}
 
                       {/* One Way Invoice */}
                       {carData.tripType === 'oneWay' && (

@@ -41,6 +41,9 @@ export const metadata: Metadata = {
     images: ["https://worldtriplink.com/images/og-image.jpg"],
   },
   robots: "index, follow",
+  other: {
+    "google-site-verification": "6SysWbzWBM94Wtixh0BkkT2Tbd5-Fcmw7nzrbNyRT2w",
+  },
 }
 
 import HomePage from "./HomePage"
